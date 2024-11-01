@@ -1,14 +1,40 @@
-import { View, type ViewProps } from 'react-native';
+import { type ViewProps } from "react-native";
+import Animated, { AnimatedProps } from "react-native-reanimated";
 
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { cn } from "@/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
+import { useColorScheme } from "nativewind";
+import { themes } from "@/constants/themes";
 
-export type ThemedViewProps = ViewProps & {
-  lightColor?: string;
-  darkColor?: string;
-};
+const viewVariants = cva("bg-background", {
+  variants: {
+    variant: {
+      default: "bg-background",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
 
-export function ThemedView({ style, lightColor, darkColor, ...otherProps }: ThemedViewProps) {
-  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+export type ThemedViewProps = AnimatedProps<ViewProps> & VariantProps<typeof viewVariants>;
 
-  return <View style={[{ backgroundColor }, style]} {...otherProps} />;
+export function ThemedView({
+  style,
+  className,
+  variant,
+  children,
+  ...otherProps
+}: ThemedViewProps) {
+  const colorScheme = useColorScheme().colorScheme ?? "light";
+
+  return (
+    <Animated.View
+      className={cn(viewVariants({ variant, className }))}
+      sharedTransitionTag="shared-transition"
+      {...otherProps}
+    >
+      {children}
+    </Animated.View>
+  );
 }
